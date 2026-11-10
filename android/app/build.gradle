@@ -1,8 +1,10 @@
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -10,8 +12,6 @@ if (localPropertiesFile.exists()) {
         localProperties.load(reader)
     }
 }
-
-
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
@@ -23,14 +23,11 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-
-
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
-
 
 android {
     compileSdkVersion 35
@@ -49,7 +46,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "de.bachmaier.smart_home"
         minSdkVersion 25
         targetSdkVersion 35
@@ -61,22 +57,25 @@ android {
     signingConfigs {
         release {
             keyAlias = keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("KEYALIAS")
-            keyPassword = keystoreProperties['keyPassword'] ?  keystoreProperties['keyPassword'] : System.getenv("KEYPASSWORD")
+            keyPassword = keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("KEYPASSWORD")
             storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file("keystore/your_signing_keystore.jks")
-            storePassword = keystoreProperties['storePassword'] ?  keystoreProperties['storePassword'] : System.getenv("STOREPASSWORD")
-            
+            storePassword = keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("STOREPASSWORD")
         }
     }
+
     buildTypes {
+        debug {
+            applicationIdSuffix ".test"
+        }
+
         release {
             signingConfig signingConfigs.release
             minifyEnabled false
             shrinkResources false
-
         }
     }
-    namespace 'de.bachmaier.smart_home'
 
+    namespace 'de.bachmaier.smart_home'
 }
 
 flutter {
