@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -6,6 +7,42 @@ import 'package:smart_home/device/iobroker_device.dart';
 import 'package:smart_home/manager/history/history_data.dart';
 
 import '../device.dart';
+
+Map<String, dynamic>? _decodeOtherDetails(
+    dynamic value, String dataPointId) {
+  var current = value;
+
+  while (true) {
+    if (current is String) {
+      try {
+        current = jsonDecode(current);
+      } on FormatException {
+        return null;
+      }
+    }
+
+    if (current is! Map) {
+      return null;
+    }
+
+    final details = Map<String, dynamic>.from(current);
+
+    // Erkennen und entfernen eines alten, verschachtelten DataPoint-Objekts.
+    final isWrappedDataPoint =
+        details["id"]?.toString() == dataPointId &&
+        details.containsKey("name") &&
+        (details.containsKey("valueType") ||
+            details.containsKey("type")) &&
+        details.containsKey("otherDetails");
+
+    if (isWrappedDataPoint) {
+      current = details["otherDetails"];
+      continue;
+    }
+
+    return details;
+  }
+}
 
 class DataPoint {
   dynamic value;
@@ -33,13 +70,17 @@ class DataPoint {
   });
 
   factory DataPoint.fromJSON(Map<String, dynamic> json, Device? device) {
+    final id = json["id"].toString();
+
     return DataPoint(
       name: json["name"].toString(),
       device: device,
-      id: json["id"],
+      id: id,
       role: json["role"],
       type: json["valueType"],
-      otherDetails: json,
+      otherDetails: json.containsKey("otherDetails")
+          ? _decodeOtherDetails(json["otherDetails"], id)
+          : Map<String, dynamic>.from(json),
     );
   }
 
