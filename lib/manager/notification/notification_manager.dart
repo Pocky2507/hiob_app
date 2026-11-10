@@ -129,7 +129,6 @@ class NotificationManager with WidgetsBindingObserver {
             title: 'HioB Connection Status!',
             body: contentraw,
             locked: true,
-            criticalAlert: false,
           ),
         )
         .then((value) {
